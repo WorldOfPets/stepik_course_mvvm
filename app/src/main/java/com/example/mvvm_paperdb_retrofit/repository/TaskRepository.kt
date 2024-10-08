@@ -4,7 +4,7 @@ import com.example.mvvm_paperdb_retrofit.model.tasks.TaskInterface
 import com.example.mvvm_paperdb_retrofit.model.tasks.TaskModel
 
 class TaskRepository(private val taskInterface: TaskInterface) {
-    fun getTaskById(id: Int): TaskModel {
+    fun getTaskById(id: String): TaskModel {
         return taskInterface.getTaskById(id)
     }
 
@@ -20,7 +20,11 @@ class TaskRepository(private val taskInterface: TaskInterface) {
         return taskInterface.updateTask(task)
     }
 
-    fun deleteTask(id: Int): Boolean {
+    fun deleteTask(id: String): Boolean {
         return taskInterface.deleteTask(id)
+    }
+
+    fun completeTask(id:String):Boolean{
+        return taskInterface.completeTask(id)
     }
 }

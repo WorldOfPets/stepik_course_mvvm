@@ -6,10 +6,12 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.Navigation
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.mvvm_paperdb_retrofit.R
 import com.example.mvvm_paperdb_retrofit.databinding.FragmentTaskListBinding
+import com.example.mvvm_paperdb_retrofit.view.adapters.TaskAdapter
 import com.example.mvvm_paperdb_retrofit.viewModel.TaskViewModel
-import java.util.Calendar
 
 
 class TaskFragment : Fragment() {
@@ -28,20 +30,21 @@ class TaskFragment : Fragment() {
             if (!listTasks.isNullOrEmpty()){
                 with(binding.list) {
                     layoutManager = LinearLayoutManager(context)
-                    adapter = TaskAdapter(listTasks)
+                    adapter = TaskAdapter(listTasks.filter { it.isCompleted == !taskViewModel.showActive }, requireActivity())
+                }
+                binding.btnShowCompletedTasks.text = if (taskViewModel.showActive) "Show Completed Tasks" else "Show Active Tasks"
+                binding.btnShowCompletedTasks.setOnClickListener {
+                    taskViewModel.showActive = !taskViewModel.showActive
                 }
             }
         }
-        val calendar = Calendar.getInstance()
-        val year = calendar.get(Calendar.YEAR)
-        val month = calendar.get(Calendar.MONTH) + 1 // Месяц начинается с 0, поэтому добавляем 1
-        val day = calendar.get(Calendar.DAY_OF_MONTH)
-        val hour = calendar.get(Calendar.HOUR_OF_DAY)
-        val minute = calendar.get(Calendar.MINUTE)
-        val second = calendar.get(Calendar.SECOND)
-        val millisecond = calendar.get(Calendar.MILLISECOND)
-        val dateTimeString = "$year-$month-$day $hour:$minute:$second.$millisecond"
-        taskViewModel.deleteTask(2)
+        binding.addTask.setOnClickListener {
+            taskViewModel.setCurrentTask(null)
+            Navigation.findNavController(binding.root).navigate(R.id.action_taskFragment_to_addTaskFragment)
+        }
+
+
+
 
         return binding.root
     }
