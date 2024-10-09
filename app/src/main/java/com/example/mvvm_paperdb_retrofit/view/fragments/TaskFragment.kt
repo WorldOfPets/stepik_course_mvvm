@@ -1,6 +1,7 @@
 package com.example.mvvm_paperdb_retrofit.view.fragments
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -37,6 +38,9 @@ class TaskFragment : Fragment() {
                     taskViewModel.showActive = !taskViewModel.showActive
                 }
             }
+        }
+        taskViewModel.currentTask.observe(viewLifecycleOwner){
+            Log.e(TaskFragment::class.java.simpleName, it.toString())
         }
         binding.addTask.setOnClickListener {
             taskViewModel.setCurrentTask(null)

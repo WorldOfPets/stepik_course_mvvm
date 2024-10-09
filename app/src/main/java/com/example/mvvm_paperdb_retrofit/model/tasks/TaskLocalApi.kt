@@ -11,7 +11,7 @@ import java.util.UUID
 class TaskLocalApi:TaskInterface {
     private val TASK_TABLE = "tasks"
 
-    override fun getTaskById(id: String): TaskModel {
+    override suspend fun getTaskById(id: String): TaskModel {
         val tasks = Paper.book().read<List<TaskModel>>(TASK_TABLE)
         var findTask = TaskModel()
         if(!tasks.isNullOrEmpty()){

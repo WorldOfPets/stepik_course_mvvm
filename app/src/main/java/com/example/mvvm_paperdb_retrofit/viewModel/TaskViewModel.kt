@@ -8,6 +8,9 @@ import com.example.mvvm_paperdb_retrofit.model.tasks.TaskLocalApi
 import com.example.mvvm_paperdb_retrofit.model.tasks.TaskModel
 import com.example.mvvm_paperdb_retrofit.model.tasks.TaskServerApi
 import com.example.mvvm_paperdb_retrofit.repository.TaskRepository
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class TaskViewModel:ViewModel() {
 
@@ -30,7 +33,15 @@ class TaskViewModel:ViewModel() {
     init {
         _tasks.value = localRepo.getTasks()
         _currentTask.value = null
-        Log.e(TaskViewModel::class.java.simpleName, serverRepo.getTaskById("1").toString())
+
+        CoroutineScope(Dispatchers.IO).launch {
+            Log.e(TaskViewModel::class.java.simpleName, serverRepo.getTaskById("kasjdflkj").toString())
+        }
+        //Log.e(TaskViewModel::class.java.simpleName, serverRepo.getTaskById("1").toString())
+    }
+
+    suspend fun getTaskById():TaskModel{
+        return serverRepo.getTaskById("1")
     }
 
     fun completeTask(id:String){

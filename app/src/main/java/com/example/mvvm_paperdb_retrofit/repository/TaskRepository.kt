@@ -4,7 +4,7 @@ import com.example.mvvm_paperdb_retrofit.model.tasks.TaskInterface
 import com.example.mvvm_paperdb_retrofit.model.tasks.TaskModel
 
 class TaskRepository(private val taskInterface: TaskInterface) {
-    fun getTaskById(id: String): TaskModel {
+    suspend fun getTaskById(id: String): TaskModel {
         return taskInterface.getTaskById(id)
     }
 
