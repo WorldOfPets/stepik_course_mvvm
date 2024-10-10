@@ -9,7 +9,8 @@ interface TaskServerInterface {
     @GET("/task/{id}")
     fun getTaskById(@Path("id") id: String): Call<TaskModel>
 
-    fun getTasks(): List<TaskModel>
+    @GET("/task")
+    fun getTasks():Call<List<TaskModel>>
 
     fun addTask(task: TaskModel): Boolean
 

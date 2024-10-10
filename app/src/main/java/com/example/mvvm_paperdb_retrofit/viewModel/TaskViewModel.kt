@@ -4,15 +4,15 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.example.mvvm_paperdb_retrofit.model.MyCustomCallback
 import com.example.mvvm_paperdb_retrofit.model.tasks.TaskLocalApi
 import com.example.mvvm_paperdb_retrofit.model.tasks.TaskModel
 import com.example.mvvm_paperdb_retrofit.model.tasks.TaskServerApi
 import com.example.mvvm_paperdb_retrofit.repository.TaskRepository
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import com.example.mvvm_paperdb_retrofit.retrofit.RetrofitService
 
-class TaskViewModel:ViewModel() {
+class TaskViewModel:ViewModel(),
+    MyCustomCallback<TaskModel>{
 
     private var serverRepo = TaskRepository(TaskServerApi())
     private var localRepo = TaskRepository(TaskLocalApi())
@@ -31,26 +31,22 @@ class TaskViewModel:ViewModel() {
             _tasks.value = _tasks.value
         }
     init {
-        _tasks.value = localRepo.getTasks()
+        localRepo.getTasks(this@TaskViewModel)
+        Log.e(TaskViewModel::class.java.simpleName, RetrofitService.checkInternetConnection().toString())
+        serverRepo.getTasks(this@TaskViewModel)
         _currentTask.value = null
 
-        CoroutineScope(Dispatchers.IO).launch {
-            Log.e(TaskViewModel::class.java.simpleName, serverRepo.getTaskById("kasjdflkj").toString())
-        }
+        serverRepo.getTaskById("1", this@TaskViewModel)
         //Log.e(TaskViewModel::class.java.simpleName, serverRepo.getTaskById("1").toString())
-    }
-
-    suspend fun getTaskById():TaskModel{
-        return serverRepo.getTaskById("1")
     }
 
     fun completeTask(id:String){
         localRepo.completeTask(id)
-        _tasks.value = localRepo.getTasks()
+        localRepo.getTasks(this)
     }
     fun addTask(task: TaskModel) {
         localRepo.addTask(task)
-        _tasks.value = localRepo.getTasks()
+        localRepo.getTasks(this)
     }
     fun setCurrentTask(task: TaskModel?){
         _currentTask.value = task
@@ -61,11 +57,23 @@ class TaskViewModel:ViewModel() {
         task.timeCreated = _currentTask.value?.timeCreated.toString()
         _currentTask.value = null
         localRepo.updateTask(task)
-        _tasks.value = localRepo.getTasks()
+        localRepo.getTasks(this@TaskViewModel)
     }
 
     fun deleteTask(id: String) {
         localRepo.deleteTask(id)
-        _tasks.value = localRepo.getTasks()
+        localRepo.getTasks(this@TaskViewModel)
+    }
+
+    override fun onSuccess(model: TaskModel) {
+        Log.e(TaskViewModel::class.java.simpleName, model.toString())
+    }
+
+    override fun onSuccess(listModel: List<TaskModel>) {
+        _tasks.postValue(listModel.distinctBy { it.id })
+    }
+
+    override fun onFailure(exception: String) {
+        Log.e(TaskViewModel::class.java.simpleName, exception)
     }
 }

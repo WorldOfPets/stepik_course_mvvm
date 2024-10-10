@@ -1,15 +1,16 @@
 package com.example.mvvm_paperdb_retrofit.repository
 
+import com.example.mvvm_paperdb_retrofit.model.MyCustomCallback
 import com.example.mvvm_paperdb_retrofit.model.tasks.TaskInterface
 import com.example.mvvm_paperdb_retrofit.model.tasks.TaskModel
 
 class TaskRepository(private val taskInterface: TaskInterface) {
-    suspend fun getTaskById(id: String): TaskModel {
-        return taskInterface.getTaskById(id)
+    fun getTaskById(id: String, callback: MyCustomCallback<TaskModel>) {
+        taskInterface.getTaskById(id, callback)
     }
 
-    fun getTasks(): List<TaskModel> {
-        return taskInterface.getTasks()
+    fun getTasks(callback: MyCustomCallback<TaskModel>){
+        taskInterface.getTasks(callback)
     }
 
     fun addTask(task: TaskModel): Boolean {
@@ -26,5 +27,8 @@ class TaskRepository(private val taskInterface: TaskInterface) {
 
     fun completeTask(id:String):Boolean{
         return taskInterface.completeTask(id)
+    }
+    fun syncData(list: List<TaskModel>){
+        taskInterface.syncData(list)
     }
 }

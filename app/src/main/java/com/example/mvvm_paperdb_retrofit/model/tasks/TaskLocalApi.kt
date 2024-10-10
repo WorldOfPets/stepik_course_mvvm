@@ -1,6 +1,7 @@
 package com.example.mvvm_paperdb_retrofit.model.tasks
 
 import android.util.Log
+import com.example.mvvm_paperdb_retrofit.model.MyCustomCallback
 import io.paperdb.Paper
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -10,8 +11,7 @@ import java.util.UUID
 
 class TaskLocalApi:TaskInterface {
     private val TASK_TABLE = "tasks"
-
-    override suspend fun getTaskById(id: String): TaskModel {
+    override fun getTaskById(id: String, callback: MyCustomCallback<TaskModel>) {
         val tasks = Paper.book().read<List<TaskModel>>(TASK_TABLE)
         var findTask = TaskModel()
         if(!tasks.isNullOrEmpty()){
@@ -21,11 +21,14 @@ class TaskLocalApi:TaskInterface {
                 }
             }
         }
-        return findTask
     }
 
-    override fun getTasks(): List<TaskModel> {
-        return Paper.book().read<List<TaskModel>>(TASK_TABLE) ?: arrayListOf()
+    override fun getTasks(callback: MyCustomCallback<TaskModel>) {
+        try {
+            callback.onSuccess(Paper.book().read<List<TaskModel>>(TASK_TABLE) ?: arrayListOf())
+        }catch (ex : Exception){
+            callback.onFailure(ex.toString())
+        }
     }
 
     override fun addTask(task: TaskModel): Boolean {
@@ -117,5 +120,9 @@ class TaskLocalApi:TaskInterface {
             Log.e(TaskLocalApi::class.java.simpleName, ex.toString())
             return false
         }
+    }
+
+    override fun syncData(list:List<TaskModel>) {
+        TODO("Not yet implemented")
     }
 }
