@@ -12,7 +12,7 @@ interface TaskServerInterface {
     @GET("/task")
     fun getTasks():Call<List<TaskModel>>
 
-    fun addTask(task: TaskModel): Boolean
+    fun addTask(task: TaskModel): Call<TaskModel>
 
     fun updateTask(task: TaskModel):Boolean
 

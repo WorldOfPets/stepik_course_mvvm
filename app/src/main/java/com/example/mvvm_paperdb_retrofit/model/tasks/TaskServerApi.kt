@@ -43,24 +43,32 @@ class TaskServerApi :TaskInterface {
     }
 
 
-    override fun addTask(task: TaskModel): Boolean {
+    override fun addTask(task: TaskModel, callback: MyCustomCallback<TaskModel>) {
         TODO("Not yet implemented")
     }
 
-    override fun updateTask(task: TaskModel): Boolean {
+    override fun updateTask(task: TaskModel, callback: MyCustomCallback<TaskModel>) {
         TODO("Not yet implemented")
     }
 
-    override fun deleteTask(id: String): Boolean {
+    override fun deleteTask(id: String, callback: MyCustomCallback<TaskModel>) {
         TODO("Not yet implemented")
     }
 
-    override fun completeTask(id: String): Boolean {
+    override fun completeTask(id: String, callback: MyCustomCallback<TaskModel>) {
         TODO("Not yet implemented")
     }
-    override fun syncData(list:List<TaskModel>){
+    override fun syncData(list:List<TaskModel>, callback: MyCustomCallback<TaskModel>){
         list.forEach {
-            service.addTask(it)
+            service.addTask(it).enqueue(object : Callback<TaskModel>{
+                override fun onResponse(p0: Call<TaskModel>, p1: Response<TaskModel>) {
+                    callback.onSuccess(p1.body() ?: TaskModel())
+                }
+
+                override fun onFailure(p0: Call<TaskModel>, p1: Throwable) {
+                    callback.onFailure(p1.toString())
+                }
+            })
         }
     }
 }

@@ -31,7 +31,7 @@ class TaskLocalApi:TaskInterface {
         }
     }
 
-    override fun addTask(task: TaskModel): Boolean {
+    override fun addTask(task: TaskModel, callback: MyCustomCallback<TaskModel>) {
         try {
             val tasks = Paper.book().read<List<TaskModel>>(TASK_TABLE) ?: arrayListOf()
             var checkID = true
@@ -48,14 +48,14 @@ class TaskLocalApi:TaskInterface {
                 }.isNotEmpty()
             }
             Paper.book().write(TASK_TABLE, tasks + task)
-            return true
+            callback.onSuccess(Paper.book().read<List<TaskModel>>(TASK_TABLE)?: arrayListOf())
         }catch (ex:Exception){
             Log.e(TaskLocalApi::class.java.simpleName, ex.toString())
-            return false
+            callback.onFailure("TASK IS NOT DEFINE")
         }
     }
 
-    override fun updateTask(task: TaskModel):Boolean {
+    override fun updateTask(task: TaskModel, callback: MyCustomCallback<TaskModel>) {
         try {
             var tasks = Paper.book().read<List<TaskModel>>(TASK_TABLE)
             if(!tasks.isNullOrEmpty()){
@@ -69,18 +69,18 @@ class TaskLocalApi:TaskInterface {
                     }
                 }
                 Paper.book().write(TASK_TABLE, tasks)
-                return true
+                callback.onSuccess(Paper.book().read<List<TaskModel>>(TASK_TABLE)?: arrayListOf())
             }else{
-                return false
+                callback.onFailure("TASK IS NOT DEFINE")
             }
 
         }catch (ex:Exception){
             Log.e(TaskLocalApi::class.java.simpleName, ex.toString())
-            return false
+            callback.onFailure(ex.toString())
         }
     }
 
-    override fun deleteTask(id: String): Boolean {
+    override fun deleteTask(id: String, callback: MyCustomCallback<TaskModel>) {
         try {
             var newTasks = arrayListOf<TaskModel>()
             var tasks = Paper.book().read<List<TaskModel>>(TASK_TABLE)
@@ -91,17 +91,17 @@ class TaskLocalApi:TaskInterface {
                     }
                 }
                 Paper.book().write(TASK_TABLE, newTasks)
-                return true
+                callback.onSuccess(Paper.book().read<List<TaskModel>>(TASK_TABLE)?: arrayListOf())
             }else{
-                return false
+                callback.onFailure("TASK IS NOT DEFINE")
             }
         }catch (ex:Exception){
             Log.e(TaskLocalApi::class.java.simpleName, ex.toString())
-            return false
+            callback.onFailure(ex.toString())
         }
     }
 
-    override fun completeTask(id:String): Boolean {
+    override fun completeTask(id: String, callback: MyCustomCallback<TaskModel>) {
         try {
             var tasks = Paper.book().read<List<TaskModel>>(TASK_TABLE)
             if(!tasks.isNullOrEmpty()){
@@ -111,18 +111,26 @@ class TaskLocalApi:TaskInterface {
                     }
                 }
                 Paper.book().write(TASK_TABLE, tasks)
-                return true
+                callback.onSuccess(Paper.book().read<List<TaskModel>>(TASK_TABLE) ?: arrayListOf())
             }else{
-                return false
+                callback.onFailure("TASK IS NOT DEFINE")
             }
 
         }catch (ex:Exception){
             Log.e(TaskLocalApi::class.java.simpleName, ex.toString())
-            return false
+            callback.onFailure(ex.toString())
         }
     }
 
-    override fun syncData(list:List<TaskModel>) {
-        TODO("Not yet implemented")
+    override fun syncData(list: List<TaskModel>, callback: MyCustomCallback<TaskModel>) {
+        try {
+            val oldList = Paper.book().read<List<TaskModel>>(TASK_TABLE) ?: arrayListOf()
+            val newList = (oldList + list).distinctBy { it.id }
+            Paper.book().write(TASK_TABLE, newList)
+            callback.onSuccess(Paper.book().read<List<TaskModel>>(TASK_TABLE)?: arrayListOf())
+        }catch (ex:Exception){
+            callback.onFailure(ex.toString())
+        }
+
     }
 }

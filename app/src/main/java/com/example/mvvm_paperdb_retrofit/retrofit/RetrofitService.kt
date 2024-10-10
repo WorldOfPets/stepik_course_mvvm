@@ -27,10 +27,10 @@ object RetrofitService {
                     connection.connect()
                     val responseCode = connection.responseCode
                     if (responseCode == HttpURLConnection.HTTP_OK) {
-                        Log.d("InternetConnection", "Internet connection is available")
+                        Log.e("InternetConnection", "Internet connection is available")
                         true
                     } else {
-                        Log.d("InternetConnection", "Internet connection is not available")
+                        Log.e("InternetConnection", "Internet connection is not available")
                         false
                     }
                 }.await()

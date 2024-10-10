@@ -32,8 +32,12 @@ class TaskViewModel:ViewModel(),
         }
     init {
         localRepo.getTasks(this@TaskViewModel)
-        Log.e(TaskViewModel::class.java.simpleName, RetrofitService.checkInternetConnection().toString())
-        serverRepo.getTasks(this@TaskViewModel)
+        if (RetrofitService.checkInternetConnection()){
+            serverRepo.syncData(_tasks.value ?: arrayListOf(), this)
+            serverRepo.getTasks(this@TaskViewModel)
+        }
+//        Log.e(TaskViewModel::class.java.simpleName, RetrofitService.checkInternetConnection().toString())
+//        serverRepo.getTasks(this@TaskViewModel)
         _currentTask.value = null
 
         serverRepo.getTaskById("1", this@TaskViewModel)
@@ -41,12 +45,10 @@ class TaskViewModel:ViewModel(),
     }
 
     fun completeTask(id:String){
-        localRepo.completeTask(id)
-        localRepo.getTasks(this)
+        localRepo.completeTask(id, this)
     }
     fun addTask(task: TaskModel) {
-        localRepo.addTask(task)
-        localRepo.getTasks(this)
+        localRepo.addTask(task, this)
     }
     fun setCurrentTask(task: TaskModel?){
         _currentTask.value = task
@@ -56,13 +58,11 @@ class TaskViewModel:ViewModel(),
         task.id = _currentTask.value?.id.toString()
         task.timeCreated = _currentTask.value?.timeCreated.toString()
         _currentTask.value = null
-        localRepo.updateTask(task)
-        localRepo.getTasks(this@TaskViewModel)
+        localRepo.updateTask(task, this)
     }
 
     fun deleteTask(id: String) {
-        localRepo.deleteTask(id)
-        localRepo.getTasks(this@TaskViewModel)
+        localRepo.deleteTask(id, this)
     }
 
     override fun onSuccess(model: TaskModel) {

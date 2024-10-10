@@ -13,22 +13,22 @@ class TaskRepository(private val taskInterface: TaskInterface) {
         taskInterface.getTasks(callback)
     }
 
-    fun addTask(task: TaskModel): Boolean {
-        return  taskInterface.addTask(task)
+    fun addTask(task: TaskModel, callback: MyCustomCallback<TaskModel>) {
+        taskInterface.addTask(task, callback)
     }
 
-    fun updateTask(task: TaskModel):Boolean {
-        return taskInterface.updateTask(task)
+    fun updateTask(task: TaskModel, callback: MyCustomCallback<TaskModel>) {
+        taskInterface.updateTask(task, callback)
     }
 
-    fun deleteTask(id: String): Boolean {
-        return taskInterface.deleteTask(id)
+    fun deleteTask(id: String, callback: MyCustomCallback<TaskModel>) {
+        taskInterface.deleteTask(id, callback)
     }
 
-    fun completeTask(id:String):Boolean{
-        return taskInterface.completeTask(id)
+    fun completeTask(id:String, callback: MyCustomCallback<TaskModel>){
+        return taskInterface.completeTask(id, callback)
     }
-    fun syncData(list: List<TaskModel>){
-        taskInterface.syncData(list)
+    fun syncData(list: List<TaskModel>, callback: MyCustomCallback<TaskModel>){
+        taskInterface.syncData(list, callback)
     }
 }
