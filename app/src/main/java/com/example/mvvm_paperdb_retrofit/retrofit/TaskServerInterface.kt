@@ -2,7 +2,13 @@ package com.example.mvvm_paperdb_retrofit.retrofit
 
 import com.example.mvvm_paperdb_retrofit.model.tasks.TaskModel
 import retrofit2.Call
+import retrofit2.http.Body
+import retrofit2.http.DELETE
+import retrofit2.http.Field
+import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
+import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Path
 
 interface TaskServerInterface {
@@ -12,11 +18,17 @@ interface TaskServerInterface {
     @GET("/task")
     fun getTasks():Call<List<TaskModel>>
 
-    fun addTask(task: TaskModel): Call<TaskModel>
+    @POST("/task")
+    fun addTask(@Body task: TaskModel): Call<TaskModel>
 
-    fun updateTask(task: TaskModel):Boolean
+    @PUT("/task/{id}")
+    fun updateTask(@Path("id") id:String, @Body task: TaskModel): Call<TaskModel>
 
-    fun deleteTask(id: String): Boolean
+    @DELETE("/task/{id}")
+    fun deleteTask(@Path("id") id: String): Call<TaskModel>
 
-    fun completeTask(id: String): Boolean
+    @FormUrlEncoded
+    @PUT("/task/{id}")
+    fun completeTask(@Path("id") id:String, @Field("isCompleted") isCompleted:Boolean) : Call<TaskModel>
+
 }

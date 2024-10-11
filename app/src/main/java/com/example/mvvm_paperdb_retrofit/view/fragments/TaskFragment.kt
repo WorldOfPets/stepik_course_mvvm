@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
@@ -42,9 +43,15 @@ class TaskFragment : Fragment() {
         taskViewModel.currentTask.observe(viewLifecycleOwner){
             Log.e(TaskFragment::class.java.simpleName, it.toString())
         }
+        taskViewModel.notifyMsg.observe(viewLifecycleOwner){
+            Toast.makeText(requireContext(), it, Toast.LENGTH_LONG).show()
+        }
         binding.addTask.setOnClickListener {
             taskViewModel.setCurrentTask(null)
             Navigation.findNavController(binding.root).navigate(R.id.action_taskFragment_to_addTaskFragment)
+        }
+        binding.btnSyncData.setOnClickListener {
+            taskViewModel.syncData()
         }
 
 

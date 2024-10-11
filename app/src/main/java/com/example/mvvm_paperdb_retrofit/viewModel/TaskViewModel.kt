@@ -24,31 +24,44 @@ class TaskViewModel:ViewModel(),
     private var _currentTask = MutableLiveData<TaskModel?>()
     val currentTask:LiveData<TaskModel?> = _currentTask
 
+    private var _notifyMsg = MutableLiveData<String>()
+    val notifyMsg:LiveData<String> = _notifyMsg
 
+    private var isConnected:Boolean = false
+        get(){
+            return RetrofitService.checkInternetConnection()
+        }
     var showActive:Boolean = true
         set(value){
             field = value
             _tasks.value = _tasks.value
         }
     init {
-        localRepo.getTasks(this@TaskViewModel)
-        if (RetrofitService.checkInternetConnection()){
-            serverRepo.syncData(_tasks.value ?: arrayListOf(), this)
+        if (isConnected){
             serverRepo.getTasks(this@TaskViewModel)
+        }else{
+            localRepo.getTasks(this@TaskViewModel)
         }
-//        Log.e(TaskViewModel::class.java.simpleName, RetrofitService.checkInternetConnection().toString())
-//        serverRepo.getTasks(this@TaskViewModel)
         _currentTask.value = null
-
-        serverRepo.getTaskById("1", this@TaskViewModel)
-        //Log.e(TaskViewModel::class.java.simpleName, serverRepo.getTaskById("1").toString())
     }
 
     fun completeTask(id:String){
-        localRepo.completeTask(id, this)
+        if (isConnected){
+            serverRepo.completeTask(id, this)
+            localRepo.completeTask(id, this)
+        }else{
+            localRepo.completeTask(id, this)
+        }
+
     }
     fun addTask(task: TaskModel) {
-        localRepo.addTask(task, this)
+        if (isConnected){
+            serverRepo.addTask(task, this)
+            localRepo.addTask(task, this)
+        }else{
+            _notifyMsg.value = "NO INTERNET CONNECTION"
+        }
+
     }
     fun setCurrentTask(task: TaskModel?){
         _currentTask.value = task
@@ -58,22 +71,45 @@ class TaskViewModel:ViewModel(),
         task.id = _currentTask.value?.id.toString()
         task.timeCreated = _currentTask.value?.timeCreated.toString()
         _currentTask.value = null
-        localRepo.updateTask(task, this)
+        if (isConnected){
+            serverRepo.updateTask(task, this)
+            localRepo.updateTask(task, this)
+        }else{
+            _notifyMsg.value = "NO INTERNET CONNECTION"
+        }
     }
 
     fun deleteTask(id: String) {
-        localRepo.deleteTask(id, this)
+        if (isConnected){
+            serverRepo.deleteTask(id, this)
+            localRepo.deleteTask(id, this)
+        }else{
+            _notifyMsg.value = "NO INTERNET CONNECTION"
+        }
+    }
+    fun syncData(){
+        if (isConnected){
+            localRepo.syncData( this)
+        }
     }
 
     override fun onSuccess(model: TaskModel) {
-        Log.e(TaskViewModel::class.java.simpleName, model.toString())
+        if (isConnected){
+            serverRepo.getTasks(this)
+        }else{
+            localRepo.getTasks(this)
+        }
     }
 
     override fun onSuccess(listModel: List<TaskModel>) {
-        _tasks.postValue(listModel.distinctBy { it.id })
+        _tasks.value = listModel
     }
 
     override fun onFailure(exception: String) {
         Log.e(TaskViewModel::class.java.simpleName, exception)
+    }
+
+    override fun notify(msg: String, update:Boolean) {
+        _notifyMsg.value = msg
     }
 }
