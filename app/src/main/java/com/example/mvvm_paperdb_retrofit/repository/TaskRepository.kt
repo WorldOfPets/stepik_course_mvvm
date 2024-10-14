@@ -3,7 +3,6 @@ package com.example.mvvm_paperdb_retrofit.repository
 import com.example.mvvm_paperdb_retrofit.model.MyCustomCallback
 import com.example.mvvm_paperdb_retrofit.model.tasks.TaskInterface
 import com.example.mvvm_paperdb_retrofit.model.tasks.TaskModel
-import com.example.mvvm_paperdb_retrofit.retrofit.RetrofitService
 
 class TaskRepository(private val taskInterface: TaskInterface) {
     fun getTaskById(id: String, callback: MyCustomCallback<TaskModel>) {
@@ -27,9 +26,9 @@ class TaskRepository(private val taskInterface: TaskInterface) {
     }
 
     fun completeTask(id:String, callback: MyCustomCallback<TaskModel>){
-        return taskInterface.completeTask(id, callback)
+        taskInterface.completeTask(id, callback)
     }
-    fun syncData(callback: MyCustomCallback<TaskModel>){
-        RetrofitService.syncData(callback)
+    fun syncData(listTask:List<TaskModel>, callback: MyCustomCallback<TaskModel>){
+        taskInterface.syncData(listTask, callback)
     }
 }

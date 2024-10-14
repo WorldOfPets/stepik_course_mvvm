@@ -1,16 +1,10 @@
 package com.example.mvvm_paperdb_retrofit.retrofit
 
 import android.util.Log
-import com.example.mvvm_paperdb_retrofit.model.MyCustomCallback
-import com.example.mvvm_paperdb_retrofit.model.tasks.TaskModel
-import io.paperdb.Paper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.net.HttpURLConnection
@@ -46,30 +40,6 @@ object RetrofitService {
             Log.e("InternetConnection", ex.toString())
             Log.d("InternetConnection", "No internet connection")
             return false
-        }
-    }
-    fun syncData(callback: MyCustomCallback<TaskModel>){
-        val service = retrofit.create(TaskServerInterface::class.java)
-        val serverList = runBlocking {
-            CoroutineScope(Dispatchers.IO).async {
-                service.getTasks().execute().body() ?: arrayListOf()
-            }.await()
-        }
-        val localList = Paper.book().read<List<TaskModel>>("task") ?: arrayListOf()
-        if (localList != serverList){
-            localList.filter { it !in serverList }.forEach {
-                service.addTask(it).enqueue(object : Callback<TaskModel> {
-                    override fun onResponse(p0: Call<TaskModel>, p1: Response<TaskModel>) {
-
-                    }
-
-                    override fun onFailure(p0: Call<TaskModel>, p1: Throwable) {
-                        callback.onFailure(p1.toString())
-                    }
-                })
-            }
-            Paper.book().write("task", (localList + serverList).distinctBy { it.id })
-            callback.notify("DATA SYNCHRONIZED")
         }
     }
 }

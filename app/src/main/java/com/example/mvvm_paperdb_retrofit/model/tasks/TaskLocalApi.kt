@@ -48,11 +48,13 @@ class TaskLocalApi:TaskInterface {
             val formattedDate = formatter.format(date)
             task.timeCreated = formattedDate
             task.isCompleted = false
-            while (checkID){
-                task.id = UUID.randomUUID().toString()
-                checkID = tasks.filter {
-                    it.id == task.id
-                }.isNotEmpty()
+            if (task.id.isNullOrEmpty()){
+                while (checkID){
+                    task.id = UUID.randomUUID().toString()
+                    checkID = tasks.filter {
+                        it.id == task.id
+                    }.isNotEmpty()
+                }
             }
             Paper.book().write(TASK_TABLE, tasks + task)
             callback.onSuccess(task)
@@ -130,6 +132,15 @@ class TaskLocalApi:TaskInterface {
 
         }catch (ex:Exception){
             Log.e(TaskLocalApi::class.java.simpleName, ex.toString())
+            callback.onFailure(ex.toString())
+        }
+    }
+
+    override fun syncData(listTasks: List<TaskModel>, callback: MyCustomCallback<TaskModel>) {
+        try {
+            Paper.book().write("task", listTasks)
+            callback.notify("SYNC DATA WITH SERVER")
+        }catch (ex:Exception){
             callback.onFailure(ex.toString())
         }
     }

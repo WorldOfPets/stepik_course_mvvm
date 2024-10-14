@@ -27,6 +27,7 @@ class TaskViewModel:ViewModel(),
     private var _notifyMsg = MutableLiveData<String>()
     val notifyMsg:LiveData<String> = _notifyMsg
 
+
     private var isConnected:Boolean = false
         get(){
             return RetrofitService.checkInternetConnection()
@@ -38,7 +39,16 @@ class TaskViewModel:ViewModel(),
         }
     init {
         if (isConnected){
-            serverRepo.getTasks(this@TaskViewModel)
+            serverRepo.getTasks(object : MyCustomCallback<TaskModel>{
+                override fun onSuccess(listModel: List<TaskModel>) {
+                    _tasks.value = listModel
+                    localRepo.syncData(listModel, object : MyCustomCallback<TaskModel>{
+                        override fun notify(msg: String) {
+                            _notifyMsg.value = msg
+                        }
+                    })
+                }
+            })
         }else{
             localRepo.getTasks(this@TaskViewModel)
         }
@@ -47,19 +57,25 @@ class TaskViewModel:ViewModel(),
 
     fun completeTask(id:String){
         if (isConnected){
-            serverRepo.completeTask(id, this)
-            localRepo.completeTask(id, this)
+            serverRepo.completeTask(id, object : MyCustomCallback<TaskModel>{
+                override fun onSuccess(model: TaskModel) {
+                    localRepo.completeTask(id, this@TaskViewModel)
+                }
+            })
         }else{
-            localRepo.completeTask(id, this)
+            _notifyMsg.value = "NO INTERNET CONNECTION"
         }
 
     }
     fun addTask(task: TaskModel) {
         if (isConnected){
-            serverRepo.addTask(task, this)
-            localRepo.addTask(task, this)
+            serverRepo.addTask(task, object : MyCustomCallback<TaskModel> {
+                override fun onSuccess(model: TaskModel) {
+                    localRepo.addTask(task, this@TaskViewModel)
+                }
+            })
         }else{
-            _notifyMsg.value = "NO INTERNET CONNECTION"
+            localRepo.addTask(task, this@TaskViewModel)
         }
 
     }
@@ -72,8 +88,11 @@ class TaskViewModel:ViewModel(),
         task.timeCreated = _currentTask.value?.timeCreated.toString()
         _currentTask.value = null
         if (isConnected){
-            serverRepo.updateTask(task, this)
-            localRepo.updateTask(task, this)
+            serverRepo.updateTask(task, object : MyCustomCallback<TaskModel>{
+                override fun onSuccess(model: TaskModel) {
+                    localRepo.updateTask(task, this@TaskViewModel)
+                }
+            })
         }else{
             _notifyMsg.value = "NO INTERNET CONNECTION"
         }
@@ -81,21 +100,20 @@ class TaskViewModel:ViewModel(),
 
     fun deleteTask(id: String) {
         if (isConnected){
-            serverRepo.deleteTask(id, this)
-            localRepo.deleteTask(id, this)
+            serverRepo.deleteTask(id, object :MyCustomCallback<TaskModel>{
+                override fun onSuccess(model: TaskModel) {
+                    localRepo.deleteTask(id, this@TaskViewModel)
+                }
+            })
         }else{
             _notifyMsg.value = "NO INTERNET CONNECTION"
-        }
-    }
-    fun syncData(){
-        if (isConnected){
-            localRepo.syncData( this)
         }
     }
 
     override fun onSuccess(model: TaskModel) {
         if (isConnected){
-            serverRepo.getTasks(this)
+            //serverRepo.getTasks(this)
+            localRepo.getTasks(this)
         }else{
             localRepo.getTasks(this)
         }
@@ -109,7 +127,7 @@ class TaskViewModel:ViewModel(),
         Log.e(TaskViewModel::class.java.simpleName, exception)
     }
 
-    override fun notify(msg: String, update:Boolean) {
+    override fun notify(msg: String) {
         _notifyMsg.value = msg
     }
 }

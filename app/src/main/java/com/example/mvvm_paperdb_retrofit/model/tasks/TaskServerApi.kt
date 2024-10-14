@@ -122,4 +122,8 @@ class TaskServerApi :TaskInterface {
         }
     }
 
+    override fun syncData(listTasks: List<TaskModel>, callback: MyCustomCallback<TaskModel>) {
+        TODO("Not yet implemented")
+    }
+
 }

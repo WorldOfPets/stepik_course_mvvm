@@ -50,11 +50,6 @@ class TaskFragment : Fragment() {
             taskViewModel.setCurrentTask(null)
             Navigation.findNavController(binding.root).navigate(R.id.action_taskFragment_to_addTaskFragment)
         }
-        binding.btnSyncData.setOnClickListener {
-            taskViewModel.syncData()
-        }
-
-
 
 
         return binding.root

@@ -9,4 +9,5 @@ interface TaskInterface {
     fun updateTask(task: TaskModel, callback: MyCustomCallback<TaskModel>)
     fun deleteTask(id:String, callback: MyCustomCallback<TaskModel>)
     fun completeTask(id: String, callback: MyCustomCallback<TaskModel>)
+    fun syncData(listTasks:List<TaskModel>, callback: MyCustomCallback<TaskModel>)
 }
